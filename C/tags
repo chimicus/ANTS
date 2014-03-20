@@ -1,0 +1,68 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+CC	Makefile	/^CC=gcc$/;"	m
+CFLAGS	Makefile	/^CFLAGS=-O3 -funroll-loops -c$/;"	m
+COL	YourCode.c	33;"	d	file:
+DOWN	YourCode.c	18;"	d	file:
+EXECUTABLE	Makefile	/^EXECUTABLE=MyBot$/;"	m
+HEADERS	Makefile	/^HEADERS=ants.h$/;"	m
+ID	YourCode.c	34;"	d	file:
+LDFLAGS	Makefile	/^LDFLAGS=-O2$/;"	m
+LDLIBS	Makefile	/^LDLIBS=-lm$/;"	m
+LEFT	YourCode.c	19;"	d	file:
+OBJECTS	Makefile	/^OBJECTS=$(addsuffix .o, $(basename ${SOURCES}))$/;"	m
+RIGHT	YourCode.c	20;"	d	file:
+ROW	YourCode.c	32;"	d	file:
+SOURCES	Makefile	/^SOURCES=MyBot.c YourCode.c ants.c$/;"	m
+UP	YourCode.c	17;"	d	file:
+_init_ants	ants.c	/^void _init_ants(char *data, struct game_info *game_info) {$/;"	f
+_init_game	ants.c	/^void _init_game(struct game_info *game_info, struct game_state *game_state) {$/;"	f
+_init_map	ants.c	/^void _init_map(char *data, struct game_info *game_info) {$/;"	f
+abs	MyBot.c	/^int abs(int x) {$/;"	f
+attackradius_sq	ants.h	/^	int attackradius_sq;$/;"	m	struct:game_info
+basic_ant	ants.h	/^struct basic_ant {$/;"	s
+col	ants.h	/^    int col;$/;"	m	struct:basic_ant
+col	ants.h	/^    int col;$/;"	m	struct:food
+col	ants.h	/^    int col;$/;"	m	struct:hill
+col	ants.h	/^    int col;$/;"	m	struct:my_ant
+cols	ants.h	/^	int cols;$/;"	m	struct:game_info
+dead_ants	ants.h	/^    struct basic_ant *dead_ants;$/;"	m	struct:game_state	typeref:struct:game_state::basic_ant
+dead_count	ants.h	/^    int dead_count;$/;"	m	struct:game_state
+distance	MyBot.c	/^int distance(int row1, int col1, int row2, int col2, struct game_info *Info) {$/;"	f
+do_turn	YourCode.c	/^void do_turn(struct game_state *Game, struct game_info *Info) {$/;"	f
+enemy_ants	ants.h	/^    struct basic_ant *enemy_ants;$/;"	m	struct:game_state	typeref:struct:game_state::basic_ant
+enemy_count	ants.h	/^    int enemy_count;$/;"	m	struct:game_state
+food	ants.h	/^    struct food *food;$/;"	m	struct:game_state	typeref:struct:game_state::food
+food	ants.h	/^struct food {$/;"	s
+food_count	ants.h	/^    int food_count;$/;"	m	struct:game_state
+game_info	ants.h	/^struct game_info {$/;"	s
+game_state	ants.h	/^struct game_state {$/;"	s
+get_line	MyBot.c	/^char *get_line(char *text) {$/;"	f
+hill	ants.h	/^    struct hill *hill;$/;"	m	struct:game_state	typeref:struct:game_state::hill
+hill	ants.h	/^struct hill {$/;"	s
+hill_count	ants.h	/^    int hill_count;$/;"	m	struct:game_state
+id	ants.h	/^    int id;$/;"	m	struct:my_ant
+loadtime	ants.h	/^	int loadtime;$/;"	m	struct:game_info
+main	MyBot.c	/^int main(int argc, char *argv[]) {$/;"	f
+map	ants.h	/^	char *map;$/;"	m	struct:game_info
+move	MyBot.c	/^void move(int index, char dir, struct game_state* Game, struct game_info* Info) {$/;"	f
+my_ant	ants.h	/^struct my_ant {$/;"	s
+my_ant_index	ants.h	/^    int my_ant_index;$/;"	m	struct:game_state
+my_ants	ants.h	/^    struct my_ant *my_ants;$/;"	m	struct:game_state	typeref:struct:game_state::my_ant
+my_count	ants.h	/^    int my_count;$/;"	m	struct:game_state
+player	ants.h	/^    char player;$/;"	m	struct:basic_ant
+player	ants.h	/^    char player;$/;"	m	struct:hill
+row	ants.h	/^    int row;$/;"	m	struct:basic_ant
+row	ants.h	/^    int row;$/;"	m	struct:food
+row	ants.h	/^    int row;$/;"	m	struct:hill
+row	ants.h	/^    int row;$/;"	m	struct:my_ant
+rows	ants.h	/^	int rows;$/;"	m	struct:game_info
+seed	ants.h	/^    int seed;$/;"	m	struct:game_info
+spawnradius_sq	ants.h	/^	int spawnradius_sq;$/;"	m	struct:game_info
+turns	ants.h	/^	int turns;$/;"	m	struct:game_info
+turntime	ants.h	/^	int turntime;$/;"	m	struct:game_info
+viewradius_sq	ants.h	/^	int viewradius_sq;$/;"	m	struct:game_info
