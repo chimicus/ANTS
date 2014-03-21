@@ -20,24 +20,40 @@ class MyBot:
     # the ants class has the game state and is updated by the Ants.run method
     # it also has several helper methods to use
     def do_turn(self, ants):
-        # loop through all my ants and try to give them orders
-        # the ant_loc is an ant location tuple in (row, col) form
-        for ant_loc in ants.my_ants():
-            # try all directions in given order
-            directions = ('n','e','s','w')
+        # track all moves, prevent collisions
+        orders = {}
+        targets = {}
+        def do_move_direction(loc, direction):
+            new_loc = ants.destination(loc, direction)
+            if (ants.unoccupied(new_loc) and new_loc not in orders) and ants.passable(new_loc):
+		ants.issue_order((loc, direction))
+                orders[new_loc] = loc
+                return True
+            else:
+                return False
+
+        def do_move_location(loc, dest):
+            directions = ants.direction(loc, dest)
             for direction in directions:
-                # the destination method will wrap around the map properly
-                # and give us a new (row, col) tuple
-                new_loc = ants.destination(ant_loc, direction)
-                # passable returns true if the location is land
-                if (ants.passable(new_loc)):
-                    # an order is the location of a current ant and a direction
-                    ants.issue_order((ant_loc, direction))
-                    # stop now, don't give 1 ant multiple orders
-                    break
-            # check if we still have time left to calculate more orders
-            if ants.time_remaining() < 10:
-                break
+                if do_move_direction(loc, direction):
+                    targets[dest] = loc
+                    return True
+            return False
+
+        # find close food
+        ant_dist = []
+        for food_loc in ants.food():
+            for ant_loc in ants.my_ants():
+                dist = ants.distance(ant_loc, food_loc)
+                ant_dist.append((dist, ant_loc, food_loc))
+        ant_dist.sort()
+        for dist, ant_loc, food_loc in ant_dist:
+            if food_loc not in targets and ant_loc not in targets.values():
+                do_move_location(ant_loc, food_loc)
+
+        # check if we still have time left to calculate more orders
+        # if ants.time_remaining() < 10:
+        #    break
             
 if __name__ == '__main__':
     # psyco will speed up python a little, but is not needed
