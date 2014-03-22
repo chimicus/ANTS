@@ -10,6 +10,7 @@ class MyBot:
         self.dbg_file = open('local_debug.txt', 'w') 
         self.possible_directions = ['n' , 'w' , 's' , 'e']
         self.ant_pref_dir = {}
+        self.ant_target = {}
         pass
     
     # do_setup is run once at the start of the game
@@ -32,6 +33,7 @@ class MyBot:
         # track all moves, prevent collisions
         orders = {}
         targets = {}
+
         def do_move_direction(loc, direction):
           new_loc = ants.destination(loc, direction)
           if (ants.unoccupied(new_loc) and new_loc not in orders) and ants.passable(new_loc) and new_loc not in ants.my_hills():
@@ -68,15 +70,6 @@ class MyBot:
           if do_move_direction(ant, new_dir):
             return True
           return False
-
-        def remove_dir(remove):
-          self.dbg_file.write('ant has a direction, trying to remove both\n')
-          new_dir = self.ant_pref_dir[act_ant]
-          del self.ant_pref_dir[act_ant]
-          if do_move_direction(act_ant, new_dir) is False:
-            while do_get_alternate_dir(act_ant, new_dir):
-              pass
-          return True
  
         def do_explore(ant):
           unseen_dist = []
@@ -90,13 +83,14 @@ class MyBot:
           return True
 
         food_idx = 0
+        enemy_hill = 0
         # not seen territory setup
         for loc in self.unseen[:]:
           if ants.visible(loc):
             self.unseen.remove(loc)
         # enemy hill setup
-        for hill_loc, hill_own in ants.enemy_hill:
-          if hill_loc not in self.hills
+        for hill_loc, hill_own in ants.enemy_hills():
+          if hill_loc not in self.hills:
             self.hills.append(hill_loc)
         # main cycle, cycle trough all the ants
         for act_ant in ants.my_ants():
@@ -107,8 +101,10 @@ class MyBot:
             if do_move_location(act_ant, food_loc):
               self.dbg_file.write('ant is moving toward food\n')
               food_idx += 1
-          elif act_ant in self.ant_pref_dir:
-            remove_dir(act_ant)
+          elif enemy_hill < len(self.hills):
+            en_hil_loc = self.hills(enemy_hill)
+            self.dbg_file.write('enemy hill location for ant is %s\n' % str(en_hil_loc))
+            # algoritmo per assegnare un percorso alla formica incaricata di chiudere la tana
           else:
             # just explore
             do_explore(act_ant) 
