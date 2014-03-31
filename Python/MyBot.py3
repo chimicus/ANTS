@@ -9,7 +9,6 @@ class MyBot:
         # define class level variables, will be remembered between turns
         self.dbg_file = open('local_debug.txt', 'w') 
         self.possible_directions = ['n' , 'w' , 's' , 'e']
-        self.ant_target = {}
         self.turn = 0
         pass
     
@@ -41,33 +40,30 @@ class MyBot:
           if (ants.unoccupied(new_loc) and new_loc not in orders) and ants.passable(new_loc) and new_loc not in ants.my_hills():
 	    ants.issue_order((loc, direction))
             orders[new_loc] = loc
+            self.dbg_file.write('orders[{}] = {} \n'.format(str(new_loc), str(loc)))
+#            self.dbg_file.write('do_move_direction is True\n')
             return True
           else:
+#            self.dbg_file.write('do_move_direction is False\n')
             return False
 
         def do_move_location(loc, dest):
           directions = ants.direction(loc, dest)
           for direction in directions:
             if do_move_direction(loc, direction):
-              targets[dest] = loc
-              self.dbg_file.write('targets[%s]=%s\n' % (str(dest), str(loc)))
+ #             self.dbg_file.write('do_move_location is True\n')
               return True
+#          self.dbg_file.write('do_move_location is False\n')
           return False
       
         def do_get_alternate_dir(ant, first_dir):
-#          if first_dir == 'n':
-#            new_dir = 'w'        
-#          elif first_dir == 'w':
-#            new_dir = 's'        
-#          elif first_dir == 's':
-#            new_dir = 'e'        
-#          elif first_dir == 'e':
-#            new_dir = 'n'
           new_dir = self.possible_directions[random.randint(0,3)]          
           while new_dir == first_dir:
             new_dir = self.possible_directions[random.randint(0,3)]          
           if do_move_direction(ant, new_dir):
+#            self.dbg_file.write('do_get_alternate_dir is True\n')
             return True
+#          self.dbg_file.write('do_get_alternate_dir is False\n')
           return False
  
         def do_explore(ant):
@@ -78,23 +74,39 @@ class MyBot:
           unseen_dist.sort()
           for dist, unseen_loc in unseen_dist:
             if do_move_location(ant, unseen_loc):
+#              self.dbg_file.write('do_explore is True\n')
               return True
           if do_get_alternate_dir(ant, self.possible_directions[random.randint(0,3)]):
+#            self.dbg_file.write('do_explore is True\n')
             return True
+#          self.dbg_file.write('do_explore is False\n')
           return False
         
         def set_target_for_ant(ant, food_vect):
           min_dist = range(ants.cols) + range(ants.rows)
           for food in food_vect:
-            ant_dist = ants.distance(ant, food)
-            if ant_dist < min_dist:
-              min_dist = ant_dist
-              food_loc = food
-          self.dbg_file.write('food location for ant is %s\n' % str(food_loc))
-          if do_move_location(act_ant, food_loc):
-            self.dbg_file.write('ant is moving toward food\n')
-            return True
-          return False
+            try:
+              af_dbg = ants.distance(targets[food], ant)
+            except KeyError:
+              af_dbg = 0
+#            self.dbg_file.write('af_dbg %s\n' % str(af_dbg))
+            if (food not in targets) or (af_dbg == 1):
+              ant_dist = ants.distance(ant, food)
+              if ant_dist < min_dist:
+                min_dist = ant_dist
+                food_loc = food
+          try:
+            targets[food_loc] = ant
+            self.dbg_file.write('targets[{}] = {} \n'.format(str(food_loc), str(ant)))
+#            self.dbg_file.write('food location for ant is %s\n' % str(food_loc))
+            if do_move_location(ant, food_loc):
+#              self.dbg_file.write('set_targe is True\n')
+              return True
+#            self.dbg_file.write('set_targe is False\n')
+            return False
+          except NameError:
+#            self.dbg_file.write('NameError set_targe is False\n')
+            return False
 
         food_idx = 0
         enemy_hill = 0
@@ -113,17 +125,10 @@ class MyBot:
             if set_target_for_ant(act_ant, ants.food()):
               # ant can go toward food
               food_idx += 1
-#          elif enemy_hill < len(self.hills):
-#            en_hil_loc = self.hills[enemy_hill]
-#            self.dbg_file.write('enemy hill location for ant is %s\n' % str(en_hil_loc))
             # algoritmo per assegnare un percorso alla formica incaricata di chiudere la tana
           else:
             # just explore
             do_explore(act_ant) 
-            #self.dbg_file.write('ant is exploring\n')
-            #for new_dir in self.possible_directions:
-            #  if do_move_direction(act_ant, new_dir):
-            #    break
             
 if __name__ == '__main__':
     # psyco will speed up python a little, but is not needed
