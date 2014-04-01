@@ -1,0 +1,32 @@
+a ogni turno avendo gia' tutte le formiche e tutti gli obiettivi fare un'associazione tra formiche e obiettivi e salvare queste associazioni per il prossimo turno
+le associazioni formiche obiettivi devono essere fatte su una scala di prossimita': la formica piu' vicina all'obiettivo piu' vicino
+nell'associazione non si salva la posizione attuale della formica ma quella futura
+a ogni turno per ogni formica si cerca la formica nelle associazioni. se c'e' si calcola lo spostamento e si continua
+se non c'e' si trova un obiettivo e si aggiunge
+se alla fine del turno ci sono associazioni non aggiornate si rimuovono
+
+
+associazione formiche <-> obiettivi pseudo codice:
+
+per ogni formica passo tutti gli obiettivi e salvo le distanze -> form1 : [d1, d2, d3, d4, d5..], form2 : [d1,d2,d3,d4,d5...]
+
+per ogni formica trovo la distanza minima e salvo l'indice a cui il minimo si trova
+
+per ogni minimo faccio il confronto con gli altri minimi, se gli indici sono uguali allora cerco tra i due il secondo minimo e uso quello.
+
+es:
+
+minimi_e_indici = [(1,3),(1,2),(1,4),(1,3),(2,6),(2,5),(1,7)]
+
+conflitto = true
+
+while (conflitto == true)
+  for len(minimi_e_indici)
+    if duplicate in minimi_e_indici
+      seleziona nuovo indice minimi_e_indici fra i due che confliggono: (2,8)
+      minimi_e_indici = [(2,8),(1,2),(1,4),(1,3),(2,6),(2,5),(1,7)]
+      break
+  if indice for == len(minimi_e_indici) // non ci sono stati conflitti
+    conflitto = false
+    
+
