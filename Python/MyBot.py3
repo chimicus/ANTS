@@ -10,6 +10,7 @@ class MyBot:
         self.dbg_file = open('local_debug.txt', 'w') 
         self.possible_directions = ['n' , 'w' , 's' , 'e']
         self.turn = 0
+        self.targets = {}
         pass
     
     # do_setup is run once at the start of the game
@@ -33,7 +34,6 @@ class MyBot:
         self.turn += 1
         # track all moves, prevent collisions
         orders = {}
-        targets = {}
 
         def do_move_direction(loc, direction):
           new_loc = ants.destination(loc, direction)
@@ -86,17 +86,17 @@ class MyBot:
           min_dist = range(ants.cols) + range(ants.rows)
           for food in food_vect:
             try:
-              af_dbg = ants.distance(targets[food], ant)
+              af_dbg = ants.distance(self.targets[food], ant)
             except KeyError:
               af_dbg = 0
 #            self.dbg_file.write('af_dbg %s\n' % str(af_dbg))
-            if (food not in targets) or (af_dbg == 1):
+            if (food not in self.targets) or (af_dbg == 1):
               ant_dist = ants.distance(ant, food)
               if ant_dist < min_dist:
                 min_dist = ant_dist
                 food_loc = food
           try:
-            targets[food_loc] = ant
+            self.targets[food_loc] = ant
             self.dbg_file.write('targets[{}] = {} \n'.format(str(food_loc), str(ant)))
 #            self.dbg_file.write('food location for ant is %s\n' % str(food_loc))
             if do_move_location(ant, food_loc):
