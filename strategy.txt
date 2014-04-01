@@ -8,25 +8,12 @@ se alla fine del turno ci sono associazioni non aggiornate si rimuovono
 
 associazione formiche <-> obiettivi pseudo codice:
 
-per ogni formica passo tutti gli obiettivi e salvo le distanze -> form1 : [d1, d2, d3, d4, d5..], form2 : [d1,d2,d3,d4,d5...]
+salvo in forma matriciale: formiche su righe obiettivi su colonne, distanze come valori
 
-per ogni formica trovo la distanza minima e salvo l'indice a cui il minimo si trova
+calcolo la deviazione standard di ogni riga
 
-per ogni minimo faccio il confronto con gli altri minimi, se gli indici sono uguali allora cerco tra i due il secondo minimo e uso quello.
+ordino da alto a basso per deviazione standard le righe
 
-es:
+prendo prima le distanze la cui deviazione e' la piu' alta e poi i piu bassi via via
 
-minimi_e_indici = [(1,3),(1,2),(1,4),(1,3),(2,6),(2,5),(1,7)]
-
-conflitto = true
-
-while (conflitto == true)
-  for len(minimi_e_indici)
-    if duplicate in minimi_e_indici
-      seleziona nuovo indice minimi_e_indici fra i due che confliggono: (2,8)
-      minimi_e_indici = [(2,8),(1,2),(1,4),(1,3),(2,6),(2,5),(1,7)]
-      break
-  if indice for == len(minimi_e_indici) // non ci sono stati conflitti
-    conflitto = false
-    
 
