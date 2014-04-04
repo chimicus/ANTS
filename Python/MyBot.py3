@@ -52,19 +52,13 @@ class MyBot:
 
         def do_move_location(loc, dest):
           directions = ants.direction(loc, dest)
+          if self.DEBUG:
+            self.dbg_file.write('do_move_location dest = {}\n'.format(str(dest)))
           for direction in directions:
             if do_move_direction(loc, direction):
               return True
           return False
       
-        def do_get_alternate_dir(ant, first_dir):
-          new_dir = self.possible_directions[random.randint(0,3)]          
-          while new_dir == first_dir:
-            new_dir = self.possible_directions[random.randint(0,3)]          
-          if do_move_direction(ant, new_dir):
-            return True
-          return False
-
         def get_list_variance(input_list):
           # 1 get the average
           avg = sum(input_list)/len(input_list);
@@ -80,7 +74,7 @@ class MyBot:
               if self.DEBUG:
                 self.dbg_file.write('target[{}] = {} \n'.format(str(ant), str(distances[ant])))
             for hill_loc in ants.enemy_hills():
-              distances[ant].append(ants.distance(ant,hill_loc))
+              distances[ant].append(ants.distance(ant,hill_loc[0]))
               if self.DEBUG:
                 self.dbg_file.write('target[{}] = {} \n'.format(str(ant), str(distances[ant])))
 #            for unseen in self.unseen:
@@ -101,6 +95,9 @@ class MyBot:
           return variance
  
         def use_variance(dist, used_idx):
+          food_vect = ants.food()
+          hills_vect = ants.enemy_hills() 
+          enemy_hill_offset = len(food_vect)
           # get the closest objective
           index_obj = dist[act_ant].index(min(dist[act_ant]))
           min_val = 0
@@ -124,24 +121,24 @@ class MyBot:
             self.unseen.remove(loc)
         # setup
         dist = setup_distances()
-        ants.time_remaining()
         var  = setup_variances(dist) 
         sorted_var = sorted(var, key=var.get, reverse=True)
         if self.DEBUG:
           self.dbg_file.write('sorted_var = {}\n'.format(str(sorted_var)))
-        food_vect = ants.food()
-        hills_vect = ants.enemy_hills() 
-        enemy_hill_offset = len(food_vect)
-        # main cycle, cycle trough all the ants
         used_idx = []
-        # problemi su questo if
-        if not sorted_var:
-          do_move_location(act_ant, self.unseeni[random.randint(0, len(self.unseen-1))])
-        else:
-          for act_ant in sorted_var:
+        if self.DEBUG:
+          self.dbg_file.flush()
+        for act_ant in ants.my_ants():
+          if act_ant in sorted_var:
             # get the closest objective
             [used_idx, ant_objective] = use_variance(dist, used_idx)
-          do_move_location(act_ant, ant_objective)
+            do_move_location(act_ant, ant_objective)
+            if self.DEBUG:
+              self.dbg_file.write('ant {} is using objective {}\n'.format(str(act_ant), str(ant_objective)))
+          else:
+            do_move_location(act_ant, self.unseen[random.randint(0, len(self.unseen) - 1)])
+            if self.DEBUG:
+              self.dbg_file.write('while ant {} is using a random point\n'.format(str(act_ant)))
         if self.DEBUG:
           self.dbg_file.write('\n\n\n')
           self.dbg_file.flush()
