@@ -101,18 +101,20 @@ class MyBot:
           # get the closest objective
           index_obj = dist[act_ant].index(min(dist[act_ant]))
           min_val = 0
+          ant_objective = []
           while index_obj in used_idx and min_val < 10000000:
             dist[act_ant][index_obj] = 10000000; # setting the min to a very high value
             index_obj = dist[act_ant].index(min(dist[act_ant]))
-            min_val = min(dist[act_ant])         
-          used_idx.append(index_obj)
-          # get the objective relative to that index
-          if index_obj >= enemy_hill_offset:
-          # objectie is an enemy hill
-            ant_objective = hills_vect[index_obj]
-          else:
-          # objective is food
-            ant_objective = food_vect[index_obj]
+            min_val = min(dist[act_ant]) 
+	  if min_val < 10000000:
+            used_idx.append(index_obj)
+            # get the objective relative to that index
+            if index_obj >= enemy_hill_offset:
+            # objectie is an enemy hill
+              ant_objective = hills_vect[index_obj]
+            else:
+            # objective is food
+              ant_objective = food_vect[index_obj]
           return [used_idx, ant_objective]
 
         # not seen territory setup
@@ -132,9 +134,15 @@ class MyBot:
           if act_ant in sorted_var:
             # get the closest objective
             [used_idx, ant_objective] = use_variance(dist, used_idx)
-            do_move_location(act_ant, ant_objective)
-            if self.DEBUG:
-              self.dbg_file.write('ant {} is using objective {}\n'.format(str(act_ant), str(ant_objective)))
+	    if not ant_objective:
+              do_move_location(act_ant, self.unseen[random.randint(0, len(self.unseen) - 1)])
+              if self.DEBUG:
+                self.dbg_file.write('while ant {} is using a random point\n'.format(str(act_ant)))
+	    else:
+              do_move_location(act_ant, ant_objective)
+              if self.DEBUG:
+                self.dbg_file.write('ant {} is using objective {}\n'.format(str(act_ant), str(ant_objective)))
+                self.dbg_file.write('used_idx is {}\n'.format(str(used_idx)))
           else:
             do_move_location(act_ant, self.unseen[random.randint(0, len(self.unseen) - 1)])
             if self.DEBUG:
