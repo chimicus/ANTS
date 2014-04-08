@@ -15,6 +15,8 @@ class MyBot:
           self.dbg_file = open('local_debug.txt', 'w') 
         self.possible_directions = ['n' , 'w' , 's' , 'e']
         self.turn = 0
+        self.ant_objectives = {}
+        # track all moves, prevent collisions
         pass
     
     # do_setup is run once at the start of the game
@@ -36,7 +38,6 @@ class MyBot:
         if self.DEBUG:
           self.dbg_file.write('turn %d\n' % self.turn)
         self.turn += 1
-        # track all moves, prevent collisions
         orders = {}
 
         def do_move_direction(loc, direction):
@@ -69,21 +70,31 @@ class MyBot:
           # setup food and ants target
           distances = defaultdict(list)
           for ant in ants.my_ants():
-            for food in ants.food():
-              distances[ant].append(ants.distance(ant,food))
-              if self.DEBUG:
-                self.dbg_file.write('target[{}] = {} \n'.format(str(ant), str(distances[ant])))
-            for hill_loc in ants.enemy_hills():
-              distances[ant].append(ants.distance(ant,hill_loc[0]))
-              if self.DEBUG:
-                self.dbg_file.write('target[{}] = {} \n'.format(str(ant), str(distances[ant])))
-#            for unseen in self.unseen:
-#              distances[ant].append(ants.distance(ant,unseen))
-#              if self.DEBUG:
-#                self.dbg_file.write('target[{}] = {} \n'.format(str(ant), str(distances[ant])))
-            # this is the heavy part, drop it if we are going to run out of time!
-            if ants.time_remaining() < 10:
-              break;
+#            if ant in self.ant_objectives:
+#              if ants.distance(ant, self.ant_objectives[ant]) == 1:
+#                if self.DEBUG:
+#                  self.dbg_file.write('self.ant_objectives[{}], ant = {}\n'.format(str(self.ant_objectives[ant]), str(ant)))
+#                del self.ant_objectives[ant]
+#            if ant not in self.ant_objectives:
+              for food in ants.food():
+                distances[ant].append(ants.distance(ant,food))
+                if self.DEBUG:
+                  self.dbg_file.write('target[{}] = {} \n'.format(str(ant), str(distances[ant])))
+              for hill_loc in ants.enemy_hills():
+                distances[ant].append(ants.distance(ant,hill_loc[0]))
+                if self.DEBUG:
+                  self.dbg_file.write('target[{}] = {} \n'.format(str(ant), str(distances[ant])))
+#              for unseen in self.unseen:
+#                distances[ant].append(ants.distance(ant,unseen))
+#                if self.DEBUG:
+#                  self.dbg_file.write('target[{}] = {} \n'.format(str(ant), str(distances[ant])))
+              # this is the heavy part, drop it if we are going to run out of time!
+              if ants.time_remaining() < 10:
+                break;
+#            else:
+#              new_dir = self.ant_objectives[ant]
+#              del self.ant_objectives[ant]
+#              do_move_location(ant, new_dir)
           return distances
 
         def setup_variances(distances):
