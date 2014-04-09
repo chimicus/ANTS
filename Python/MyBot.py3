@@ -98,6 +98,8 @@ class MyBot:
           food_vect = ants.food()
           hills_vect = ants.enemy_hills() 
           enemy_hill_offset = len(food_vect)
+          if self.DEBUG:
+            self.dbg_file.write('food {} enemy hills {}\n'.format(str(food_vect),str(hills_vect)))
           # get the closest objective
           index_obj = dist[act_ant].index(min(dist[act_ant]))
           min_val = 0
@@ -128,8 +130,6 @@ class MyBot:
         if self.DEBUG:
           self.dbg_file.write('sorted_var = {}\n'.format(str(sorted_var)))
         used_idx = []
-        if self.DEBUG:
-          self.dbg_file.flush()
         for act_ant in ants.my_ants():
           if act_ant in sorted_var:
             # get the closest objective
