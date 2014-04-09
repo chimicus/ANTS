@@ -15,6 +15,8 @@ class MyBot:
           self.dbg_file = open('local_debug.txt', 'w') 
         self.possible_directions = ['n' , 'w' , 's' , 'e']
         self.turn = 0
+        self.ant_objectives = {}
+        # track all moves, prevent collisions
         pass
     
     # do_setup is run once at the start of the game
@@ -36,16 +38,15 @@ class MyBot:
         if self.DEBUG:
           self.dbg_file.write('turn %d\n' % self.turn)
         self.turn += 1
-        # track all moves, prevent collisions
         orders = {}
 
         def do_move_direction(loc, direction):
           new_loc = ants.destination(loc, direction)
-          if (ants.unoccupied(new_loc) and new_loc not in orders) and ants.passable(new_loc) and new_loc not in ants.my_hills():
+          if (ants.unoccupied(new_loc) and new_loc not in orders.values()) and ants.passable(new_loc) and new_loc not in ants.my_hills():
 	    ants.issue_order((loc, direction))
-            orders[new_loc] = loc
+            orders[loc] = new_loc
             if self.DEBUG:
-              self.dbg_file.write('orders[{}] = {} \n'.format(str(new_loc), str(loc)))
+              self.dbg_file.write('orders[{}] = {} \n'.format(str(loc), str(new_loc)))
             return True
           else:
             return False
@@ -69,21 +70,31 @@ class MyBot:
           # setup food and ants target
           distances = defaultdict(list)
           for ant in ants.my_ants():
-            for food in ants.food():
-              distances[ant].append(ants.distance(ant,food))
-              if self.DEBUG:
-                self.dbg_file.write('target[{}] = {} \n'.format(str(ant), str(distances[ant])))
-            for hill_loc in ants.enemy_hills():
-              distances[ant].append(ants.distance(ant,hill_loc[0]))
-              if self.DEBUG:
-                self.dbg_file.write('target[{}] = {} \n'.format(str(ant), str(distances[ant])))
-#            for unseen in self.unseen:
-#              distances[ant].append(ants.distance(ant,unseen))
-#              if self.DEBUG:
-#                self.dbg_file.write('target[{}] = {} \n'.format(str(ant), str(distances[ant])))
-            # this is the heavy part, drop it if we are going to run out of time!
-            if ants.time_remaining() < 10:
-              break;
+            if ant in self.ant_objectives:
+              if ants.distance(ant, self.ant_objectives[ant]) == 1:
+                if self.DEBUG:
+                  self.dbg_file.write('removing self.ant_objectives[{}], ant = {}\n'.format(str(self.ant_objectives[ant]), str(ant)))
+                del self.ant_objectives[ant]
+            if ant not in self.ant_objectives:
+              for food in ants.food():
+                distances[ant].append(ants.distance(ant,food))
+                if self.DEBUG:
+                  self.dbg_file.write('target[{}] = {} \n'.format(str(ant), str(distances[ant])))
+              for hill_loc in ants.enemy_hills():
+                distances[ant].append(ants.distance(ant,hill_loc[0]))
+                if self.DEBUG:
+                  self.dbg_file.write('target[{}] = {} \n'.format(str(ant), str(distances[ant])))
+#              for unseen in self.unseen:
+#                distances[ant].append(ants.distance(ant,unseen))
+#                if self.DEBUG:
+#                  self.dbg_file.write('target[{}] = {} \n'.format(str(ant), str(distances[ant])))
+              # this is the heavy part, drop it if we are going to run out of time!
+              if ants.time_remaining() < 10:
+                break;
+            else:
+              new_dir = self.ant_objectives[ant]
+              del self.ant_objectives[ant]
+              do_move_location(ant, new_dir)
           return distances
 
         def setup_variances(distances):
@@ -140,6 +151,9 @@ class MyBot:
                 self.dbg_file.write('while ant {} is using a random point\n'.format(str(act_ant)))
 	    else:
               do_move_location(act_ant, ant_objective)
+              # write the objective to the list of objectives
+              new_loc = orders[act_ant]
+              self.ant_objectives[new_loc] = ant_objective
               if self.DEBUG:
                 self.dbg_file.write('ant {} is using objective {}\n'.format(str(act_ant), str(ant_objective)))
                 self.dbg_file.write('used_idx is {}\n'.format(str(used_idx)))
