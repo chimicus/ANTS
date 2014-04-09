@@ -42,11 +42,11 @@ class MyBot:
 
         def do_move_direction(loc, direction):
           new_loc = ants.destination(loc, direction)
-          if (ants.unoccupied(new_loc) and new_loc not in orders) and ants.passable(new_loc) and new_loc not in ants.my_hills():
+          if (ants.unoccupied(new_loc) and new_loc not in orders.values()) and ants.passable(new_loc) and new_loc not in ants.my_hills():
 	    ants.issue_order((loc, direction))
-            orders[new_loc] = loc
+            orders[loc] = new_loc
             if self.DEBUG:
-              self.dbg_file.write('orders[{}] = {} \n'.format(str(new_loc), str(loc)))
+              self.dbg_file.write('orders[{}] = {} \n'.format(str(loc), str(new_loc)))
             return True
           else:
             return False
@@ -70,12 +70,12 @@ class MyBot:
           # setup food and ants target
           distances = defaultdict(list)
           for ant in ants.my_ants():
-#            if ant in self.ant_objectives:
-#              if ants.distance(ant, self.ant_objectives[ant]) == 1:
-#                if self.DEBUG:
-#                  self.dbg_file.write('self.ant_objectives[{}], ant = {}\n'.format(str(self.ant_objectives[ant]), str(ant)))
-#                del self.ant_objectives[ant]
-#            if ant not in self.ant_objectives:
+            if ant in self.ant_objectives:
+              if ants.distance(ant, self.ant_objectives[ant]) == 1:
+                if self.DEBUG:
+                  self.dbg_file.write('removing self.ant_objectives[{}], ant = {}\n'.format(str(self.ant_objectives[ant]), str(ant)))
+                del self.ant_objectives[ant]
+            if ant not in self.ant_objectives:
               for food in ants.food():
                 distances[ant].append(ants.distance(ant,food))
                 if self.DEBUG:
@@ -91,10 +91,10 @@ class MyBot:
               # this is the heavy part, drop it if we are going to run out of time!
               if ants.time_remaining() < 10:
                 break;
-#            else:
-#              new_dir = self.ant_objectives[ant]
-#              del self.ant_objectives[ant]
-#              do_move_location(ant, new_dir)
+            else:
+              new_dir = self.ant_objectives[ant]
+              del self.ant_objectives[ant]
+              do_move_location(ant, new_dir)
           return distances
 
         def setup_variances(distances):
@@ -151,6 +151,9 @@ class MyBot:
                 self.dbg_file.write('while ant {} is using a random point\n'.format(str(act_ant)))
 	    else:
               do_move_location(act_ant, ant_objective)
+              # write the objective to the list of objectives
+              new_loc = orders[act_ant]
+              self.ant_objectives[new_loc] = ant_objective
               if self.DEBUG:
                 self.dbg_file.write('ant {} is using objective {}\n'.format(str(act_ant), str(ant_objective)))
                 self.dbg_file.write('used_idx is {}\n'.format(str(used_idx)))
