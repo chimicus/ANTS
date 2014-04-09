@@ -41,20 +41,24 @@ class MyBot:
         orders = {}
 
         def do_move_direction(loc, direction):
+          if self.DEBUG:
+            self.dbg_file.write('do_move_direction()')
           new_loc = ants.destination(loc, direction)
+          if self.DEBUG:
+            self.dbg_file.write('orders.values = {}, new_loc = {} \n'.format(str(orders.values()), str(new_loc)))
           if (ants.unoccupied(new_loc) and new_loc not in orders.values()) and ants.passable(new_loc) and new_loc not in ants.my_hills():
 	    ants.issue_order((loc, direction))
             orders[loc] = new_loc
             if self.DEBUG:
-              self.dbg_file.write('orders[{}] = {} \n'.format(str(loc), str(new_loc)))
+              self.dbg_file.write('ant {} is moving to {} \n'.format(str(loc), str(new_loc)))
             return True
           else:
             return False
 
         def do_move_location(loc, dest):
-          directions = ants.direction(loc, dest)
           if self.DEBUG:
-            self.dbg_file.write('do_move_location dest = {}\n'.format(str(dest)))
+            self.dbg_file.write('do_move_location()')
+          directions = ants.direction(loc, dest)
           for direction in directions:
             if do_move_direction(loc, direction):
               return True
@@ -68,22 +72,24 @@ class MyBot:
 
         def setup_distances():
           # setup food and ants target
+          if self.DEBUG:
+            self.dbg_file.write('setup_distances()')
           distances = defaultdict(list)
           for ant in ants.my_ants():
             if ant in self.ant_objectives:
               if ants.distance(ant, self.ant_objectives[ant]) == 1:
                 if self.DEBUG:
-                  self.dbg_file.write('removing self.ant_objectives[{}], ant = {}\n'.format(str(self.ant_objectives[ant]), str(ant)))
+                  self.dbg_file.write('removing self.ant_objectives[{}], ant = {} from list of objectives\n'.format(str(self.ant_objectives[ant]), str(ant)))
                 del self.ant_objectives[ant]
             if ant not in self.ant_objectives:
               for food in ants.food():
                 distances[ant].append(ants.distance(ant,food))
-                if self.DEBUG:
-                  self.dbg_file.write('target[{}] = {} \n'.format(str(ant), str(distances[ant])))
+#                if self.DEBUG:
+#                  self.dbg_file.write('adding food {} for ant {} to the list of objectives\n'.format(str(distances[ant]), str(ant)))
               for hill_loc in ants.enemy_hills():
                 distances[ant].append(ants.distance(ant,hill_loc[0]))
-                if self.DEBUG:
-                  self.dbg_file.write('target[{}] = {} \n'.format(str(ant), str(distances[ant])))
+#                if self.DEBUG:
+#                  self.dbg_file.write('adding enemy hill {} for ant {} to the list of objectives\n'.format(str(distances[ant]), str(ant)))
 #              for unseen in self.unseen:
 #                distances[ant].append(ants.distance(ant,unseen))
 #                if self.DEBUG:
@@ -101,8 +107,8 @@ class MyBot:
           variance = {}
           for ant in distances:
             variance[ant] = get_list_variance(distances[ant])
-            if self.DEBUG:
-              self.dbg_file.write('variance[{}] = {} \n'.format(str(ant), str(variance[ant])))
+#            if self.DEBUG:
+#              self.dbg_file.write('variance[{}] = {} \n'.format(str(ant), str(variance[ant])))
           return variance
  
         def use_variance(dist, used_idx):
