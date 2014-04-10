@@ -125,6 +125,13 @@ class MyBot:
           if ants.visible(loc):
             self.unseen.remove(loc)
         # setup
+	# 1. create 1 vectors with all teh objectives (food + enemy hills)
+	# 2. remove from ant_objective ants close to their objective (1 space as already doing)
+	# 3. remove from the objectives the food and enemy hills that are in ant_objectives
+	# 4. update ant_objcetives
+	# 5. remove from vector of ants the ants that are already in ant_objectives
+	# 6. create ant_objectives
+	# 7. submit ants commands
         dist = setup_distances()
         var  = setup_variances(dist) 
         sorted_var = sorted(var, key=var.get, reverse=True)
