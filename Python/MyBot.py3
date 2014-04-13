@@ -70,23 +70,12 @@ class MyBot:
           list_variance = sum((avg - value) ** 2 for value in input_list) / len(input_list)
           return list_variance
 
-        def setup_distances():
+        def setup_distances(turn_obj, my_ants):
           # setup food and ants target
-          if self.DEBUG:
-            self.dbg_file.write('setup_distances()\n')
           distances = defaultdict(list)
-          for ant in ants.my_ants():
-            for food in ants.food():
-              distances[ant].append(ants.distance(ant,food))
-            for hill_loc in ants.enemy_hills():
-              distances[ant].append(ants.distance(ant,hill_loc[0]))
-#            for unseen in self.unseen:
-#              distances[ant].append(ants.distance(ant,unseen))
-#              if self.DEBUG:
-#                self.dbg_file.write('target[{}] = {} \n'.format(str(ant), str(distances[ant])))
-            # this is the heavy part, drop it if we are going to run out of time!
-            if ants.time_remaining() < 10:
-              break;
+          for ant in my_ants:
+            for obj in turn_obj:
+              distances[ant].append(ants.distance(ant,obj))
           return distances
 
         def setup_variances(distances):
@@ -126,47 +115,42 @@ class MyBot:
             self.unseen.remove(loc)
         # setup
 	# 1. create 1 vectors with all teh objectives (food + enemy hills)
+        my_ants = ants.my_ants()
+        turn_objectives = ants.food() + ants.enemy_hills().keys()
+        enemy_offset = len(ants.food())
 	# 2. remove from ant_objective ants close to their objective (1 space as already doing)
+        for act_ant in ants.my_ants():
+          if act_ant in self.ant_objectives:
+            if ants.distance(act_ant, self.ant_objectives[act_ant]) == 1:
+              del self.ant_objectives[act_ant]
 	# 3. remove from the objectives the food and enemy hills that are in ant_objectives
+        for [rem_ant, obj] in self.ant_objectives:
+          turn_objectives.remove(obj)
+          my_ants.remove(rem_ant)
 	# 4. update ant_objcetives
-	# 5. remove from vector of ants the ants that are already in ant_objectives
-	# 6. create ant_objectives
-	# 7. submit ants commands
-        dist = setup_distances()
+        dist = setup_distances(turn_objectives, my_ants)
         var  = setup_variances(dist) 
         sorted_var = sorted(var, key=var.get, reverse=True)
         if self.DEBUG:
           self.dbg_file.write('sorted_var = {}\n'.format(str(sorted_var)))
           self.dbg_file.write('ant_objectives = {}\n'.format(str(self.ant_objectives)))
           self.dbg_file.write('my_ants = {}\n'.format(str(ants.my_ants())))
+	# 5. create ant_objectives
+        for act_ant in my_ants:
+          # get the closest objective
+          [used_idx, ant_objective] = use_variance(dist, used_idx)
+          
+	# 6. submit ants commands
         used_idx = []
         for act_ant in ants.my_ants():
           if self.DEBUG:
             self.dbg_file.write('dealing with ant = {}\n'.format(str(act_ant)))
             self.dbg_file.flush()
-          if act_ant in self.ant_objectives:
-            if ants.distance(act_ant, self.ant_objectives[act_ant]) == 1:
-              if self.DEBUG:
-                self.dbg_file.write('removing objectives {} from list of objectives\n'.format(str(self.ant_objectives[act_ant])))
-                self.dbg_file.flush()
-            else:
-              if self.DEBUG:
-                self.dbg_file.write('updating objectives {} objective\n'.format(str(self.ant_objectives[act_ant])))
-                self.dbg_file.flush()
-              # update the position of objective and move ant towards it.
-              do_move_location(act_ant, self.ant_objectives[act_ant])
-              new_loc = orders[act_ant]
-      # FIND THE BEST WAY TO ELIMINATE THE USED OBJECTIVE FROM THE LIST OF POSSIBLE OBJECTIVES FRO OTHER ANTS!
-              self.ant_objectives[new_loc] = self.ant_objectives[act_ant]
-              sorted_var.remove(act_ant)
-            del self.ant_objectives[act_ant]
           if act_ant in sorted_var:
             if self.DEBUG:
               self.dbg_file.write('ant is in sorted_var\n')
               self.dbg_file.write('used_idx = {} dist[act_ant] = {}\n'.format(str(used_idx), str(dist[act_ant])))
               self.dbg_file.flush()
-            # get the closest objective
-            [used_idx, ant_objective] = use_variance(dist, used_idx)
   	    if not ant_objective:
               do_move_location(act_ant, self.unseen[random.randint(0, len(self.unseen) - 1)])
               if self.DEBUG:
