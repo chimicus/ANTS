@@ -84,40 +84,31 @@ class MyBot:
             variance[ant] = get_list_variance(distances[ant])
           return variance
  
-        def use_variance(dist, used_idx):
-          food_vect = ants.food()
-          hills_vect = ants.enemy_hills() 
-          enemy_hill_offset = len(food_vect)
-          if self.DEBUG:
-            self.dbg_file.write('food {} enemy hills {}\n'.format(str(food_vect),str(hills_vect)))
-          # get the closest objective
-          index_obj = dist[act_ant].index(min(dist[act_ant]))
-          min_val = 0
+        def use_variance(dist, used_idx, my_ants, turn_objectives):
+          used_idx = []
           ant_objective = []
-          while index_obj in used_idx and min_val < 10000000:
-            dist[act_ant][index_obj] = 10000000; # setting the min to a very high value
+          for act_ant in my_ants:
+            # get the closest objective
             index_obj = dist[act_ant].index(min(dist[act_ant]))
-            min_val = min(dist[act_ant]) 
-	  if min_val < 10000000:
-            used_idx.append(index_obj)
-            # get the objective relative to that index
-            if index_obj >= enemy_hill_offset:
-            # objectie is an enemy hill
-              ant_objective = hills_vect[index_obj]
-            else:
-            # objective is food
-              ant_objective = food_vect[index_obj]
-          return [used_idx, ant_objective]
+            min_val = 0
+            while index_obj in used_idx and min_val < 10000000:
+              dist[act_ant][index_obj] = 10000000; # setting the min to a very high value
+              index_obj = dist[act_ant].index(min(dist[act_ant]))
+              min_val = min(dist[act_ant]) 
+  	    if min_val < 10000000:
+              used_idx.append(index_obj)
+              # get the objective relative to that index
+              ant_objective.append(turn_objectives[index_obj])
+          return ant_objective
 
         # not seen territory setup
         for loc in self.unseen[:]:
           if ants.visible(loc):
             self.unseen.remove(loc)
         # setup
-	# 1. create 1 vectors with all teh objectives (food + enemy hills)
+	# 1. create 1 vectors with all the objectives (food + enemy hills)
         my_ants = ants.my_ants()
         turn_objectives = ants.food() + ants.enemy_hills().keys()
-        enemy_offset = len(ants.food())
 	# 2. remove from ant_objective ants close to their objective (1 space as already doing)
         for act_ant in ants.my_ants():
           if act_ant in self.ant_objectives:
@@ -136,12 +127,10 @@ class MyBot:
           self.dbg_file.write('ant_objectives = {}\n'.format(str(self.ant_objectives)))
           self.dbg_file.write('my_ants = {}\n'.format(str(ants.my_ants())))
 	# 5. create ant_objectives
-        for act_ant in my_ants:
-          # get the closest objective
-          [used_idx, ant_objective] = use_variance(dist, used_idx)
+        # get the closest objective
+        ant_objective = use_variance(dist, my_ants, turn_objectives)
           
 	# 6. submit ants commands
-        used_idx = []
         for act_ant in ants.my_ants():
           if self.DEBUG:
             self.dbg_file.write('dealing with ant = {}\n'.format(str(act_ant)))
