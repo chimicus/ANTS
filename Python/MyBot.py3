@@ -86,7 +86,7 @@ class MyBot:
  
         def use_variance(dist, my_ants, sorted_var, turn_objectives):
           used_idx = []
-          ant_objective = []
+          ant_objective = {}
           for act_ant in sorted_var:
             # get the closest objective
             index_obj = dist[act_ant].index(min(dist[act_ant]))
@@ -98,7 +98,7 @@ class MyBot:
   	    if min_val < 10000000:
               used_idx.append(index_obj)
               # get the objective relative to that index
-              ant_objective.append(turn_objectives[index_obj])
+              ant_objective[act_ant] = turn_objectives[index_obj]
           return ant_objective
 
         # not seen territory setup
@@ -135,6 +135,8 @@ class MyBot:
           self.dbg_file.write('ant_objective = {}\n'.format(str(ant_objective)))
           
 	# 6. submit ants commands
+        for act_ant in ant_objective:
+          do_move_location(act_ant, ant_objective[act_ant])
 #        for act_ant in ants.my_ants():
 #          if self.DEBUG:
 #            self.dbg_file.write('dealing with ant = {}\n'.format(str(act_ant)))
