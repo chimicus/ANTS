@@ -84,10 +84,10 @@ class MyBot:
             variance[ant] = get_list_variance(distances[ant])
           return variance
  
-        def use_variance(dist, used_idx, my_ants, turn_objectives):
+        def use_variance(dist, my_ants, sorted_var, turn_objectives):
           used_idx = []
           ant_objective = []
-          for act_ant in my_ants:
+          for act_ant in sorted_var:
             # get the closest objective
             index_obj = dist[act_ant].index(min(dist[act_ant]))
             min_val = 0
@@ -108,7 +108,7 @@ class MyBot:
         # setup
 	# 1. create 1 vectors with all the objectives (food + enemy hills)
         my_ants = ants.my_ants()
-        turn_objectives = ants.food() + ants.enemy_hills().keys()
+        turn_objectives = ants.food() + [hills[0] for hills in ants.enemy_hills()]
 	# 2. remove from ant_objective ants close to their objective (1 space as already doing)
         for act_ant in ants.my_ants():
           if act_ant in self.ant_objectives:
@@ -124,40 +124,44 @@ class MyBot:
         sorted_var = sorted(var, key=var.get, reverse=True)
         if self.DEBUG:
           self.dbg_file.write('sorted_var = {}\n'.format(str(sorted_var)))
-          self.dbg_file.write('ant_objectives = {}\n'.format(str(self.ant_objectives)))
-          self.dbg_file.write('my_ants = {}\n'.format(str(ants.my_ants())))
+          self.dbg_file.write('dist = {}\n'.format(str(dist)))
+          self.dbg_file.write('turn_objectives = {}\n'.format(str(turn_objectives)))
+          self.dbg_file.write('my_ants = {}\n'.format(str(my_ants)))
+          self.dbg_file.flush()
 	# 5. create ant_objectives
         # get the closest objective
-        ant_objective = use_variance(dist, my_ants, turn_objectives)
+        ant_objective = use_variance(dist, my_ants, sorted_var, turn_objectives)
+        if self.DEBUG:
+          self.dbg_file.write('ant_objective = {}\n'.format(str(ant_objective)))
           
 	# 6. submit ants commands
-        for act_ant in ants.my_ants():
-          if self.DEBUG:
-            self.dbg_file.write('dealing with ant = {}\n'.format(str(act_ant)))
-            self.dbg_file.flush()
-          if act_ant in sorted_var:
-            if self.DEBUG:
-              self.dbg_file.write('ant is in sorted_var\n')
-              self.dbg_file.write('used_idx = {} dist[act_ant] = {}\n'.format(str(used_idx), str(dist[act_ant])))
-              self.dbg_file.flush()
-  	    if not ant_objective:
-              do_move_location(act_ant, self.unseen[random.randint(0, len(self.unseen) - 1)])
-              if self.DEBUG:
-                self.dbg_file.write('ant is using a random point as no variance output\n')
-                self.dbg_file.flush()
-  	    else:
-              do_move_location(act_ant, ant_objective)
-              # write the objective to the list of objectives
-              new_loc = orders[act_ant]
-              self.ant_objectives[new_loc] = ant_objective
-              if self.DEBUG:
-                self.dbg_file.write('ant is using objective {}\n'.format(str(ant_objective)))
-                self.dbg_file.write('used_idx is {}\n'.format(str(used_idx)))
-                self.dbg_file.flush()
-          elif act_ant not in orders:
-            do_move_location(act_ant, self.unseen[random.randint(0, len(self.unseen) - 1)])
-            if self.DEBUG:
-              self.dbg_file.write('ant is using a random point as not in orders\n')
+#        for act_ant in ants.my_ants():
+#          if self.DEBUG:
+#            self.dbg_file.write('dealing with ant = {}\n'.format(str(act_ant)))
+#            self.dbg_file.flush()
+#          if act_ant in sorted_var:
+#            if self.DEBUG:
+#              self.dbg_file.write('ant is in sorted_var\n')
+#              self.dbg_file.write('used_idx = {} dist[act_ant] = {}\n'.format(str(used_idx), str(dist[act_ant])))
+#              self.dbg_file.flush()
+#  	    if not ant_objective:
+#              do_move_location(act_ant, self.unseen[random.randint(0, len(self.unseen) - 1)])
+#              if self.DEBUG:
+#                self.dbg_file.write('ant is using a random point as no variance output\n')
+#                self.dbg_file.flush()
+#  	    else:
+#              do_move_location(act_ant, ant_objective)
+#              # write the objective to the list of objectives
+#              new_loc = orders[act_ant]
+#              self.ant_objectives[new_loc] = ant_objective
+#              if self.DEBUG:
+#                self.dbg_file.write('ant is using objective {}\n'.format(str(ant_objective)))
+#                self.dbg_file.write('used_idx is {}\n'.format(str(used_idx)))
+#                self.dbg_file.flush()
+#          elif act_ant not in orders:
+#            do_move_location(act_ant, self.unseen[random.randint(0, len(self.unseen) - 1)])
+#            if self.DEBUG:
+#              self.dbg_file.write('ant is using a random point as not in orders\n')
         if self.DEBUG:
           self.dbg_file.write('\n\n\n')
           self.dbg_file.flush()
